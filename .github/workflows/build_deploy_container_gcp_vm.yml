@@ -21,6 +21,9 @@ on:
       github_sha:
         required: true
         type: string
+      environment:
+        required: true
+        type: string
     secrets:
       BUILD_SERVER_SSH_KEY:
         required: true
