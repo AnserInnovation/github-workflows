@@ -1,4 +1,4 @@
-name: Build and Deploy Container
+name: Build and Deploy Container GCP VM
 
 on:
   workflow_call:
@@ -24,10 +24,12 @@ on:
     secrets:
       BUILD_SERVER_SSH_KEY:
         required: true
+      GCP_CREDENTIALS_JSON:
+        required: true
 
 jobs:
-  example_job:
-    name: Pass input and secrets to my-action
+  build_publish_deploy:
+    name: Build, Publish, and Deploy
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -69,15 +71,20 @@ jobs:
           docker push gcr.io/$PROJECT_ID/$IMAGE_NAME:$IMAGE_TAG-$GITHUB_SHA
           echo "::set-output name=image::gcr.io/$PROJECT_ID/$IMAGE_NAME:$IMAGE_TAG-$GITHUB_SHA"
 
-      # - id: "deploy"
-      #   uses: "google-github-actions/deploy-cloudrun@v0"
-      #   with:
-      #     service: "omcare"
-      #     image: ${{ steps.docker.outputs.image }}
+      # Add pruning to VM startup script
+      - name: Update startup script to prune
+        env:
+          GCE_INSTANCE: ${{ inputs.gce_instance }}
+          GCE_INSTANCE_ZONE: ${{ inputs.gce_instance_zone }}
+        run: |-
+          gcloud compute instances add-metadata $GCE_INSTANCE \
+            --zone "$GCE_INSTANCE_ZONE" \
+            --metadata=startup-script="#! /bin/bash
+              docker image prune -af"
 
       - name: Deploy
         env:
-          GCE_INSTANCE: ${{ inputs.gce_instanace }}
+          GCE_INSTANCE: ${{ inputs.gce_instance }}
           GCE_INSTANCE_ZONE: ${{ inputs.gce_instance_zone }}
         run: |-
           gcloud compute instances update-container "$GCE_INSTANCE" \
