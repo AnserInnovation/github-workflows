@@ -65,10 +65,11 @@ jobs:
           IMAGE_TAG: ${{ inputs.image_tag }}
           IMAGE_NAME: ${{ inputs.image_name }}
           GITHUB_SHA: ${{ inputs.github_sha }}
+          ENVIRONMENT: ${{ inputs.environment }}
         run: |
           gcloud auth configure-docker
           gcloud auth application-default print-access-token > auth.txt
-          DOCKER_BUILDKIT=1 docker build --build-arg GCP_PROJECT_ID=$PROJECT_ID --secret id=auth,src=auth.txt -t $IMAGE_TAG --ssh default .
+          DOCKER_BUILDKIT=1 docker build --build-arg GCP_PROJECT_ID=$PROJECT_ID --build-arg ENVIRONMENT=$ENVIRONMENT --secret id=auth,src=auth.txt -t $IMAGE_TAG --ssh default .
 
           docker tag $IMAGE_TAG gcr.io/$PROJECT_ID/$IMAGE_NAME:$IMAGE_TAG-$GITHUB_SHA
           docker push gcr.io/$PROJECT_ID/$IMAGE_NAME:$IMAGE_TAG-$GITHUB_SHA
