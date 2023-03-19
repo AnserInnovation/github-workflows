@@ -52,6 +52,4 @@ jobs:
         run: |
           copilot --version
           ./scripts/copilot-deploy.sh
-      
-
 
