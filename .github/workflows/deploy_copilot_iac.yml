@@ -51,7 +51,16 @@ jobs:
           ENVIRONMENT: ${{ inputs.gce_instance_zone }}
         run: |
           copilot --version
-          ./scripts/copilot-deploy.sh
+          # ./scripts/copilot-deploy.sh
+
+          aws sts get-caller-identity
+          echo $GITHUB_SHA
+          echo $REGION
+          echo $ACCOUNT
+          echo $APP_NAME
+          echo $ENVIRONMENT
+
+          copilot app init $APP_NAME
       
 
 
