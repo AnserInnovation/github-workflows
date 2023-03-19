@@ -51,14 +51,7 @@ jobs:
           ENVIRONMENT: ${{ inputs.environment }}
         run: |
           copilot --version
-          # ./scripts/copilot-deploy.sh
-
-          aws sts get-caller-identity
-          echo $GITHUB_SHA
-          echo $REGION
-          echo $ACCOUNT
-          echo $APP_NAME
-          echo $ENVIRONMENT
+          ./scripts/copilot-deploy.sh
       
 
 
