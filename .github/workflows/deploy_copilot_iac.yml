@@ -44,11 +44,11 @@ jobs:
           command: install
       - name: Execute Copilot Deployment Script
         env:
-          GITHUB_SHA: ${{ inputs.gce_instance }}
-          REGION: ${{ inputs.gce_instance_zone }}
-          ACCOUNT: ${{ inputs.gce_instance_zone }}
-          APP_NAME: ${{ inputs.gce_instance_zone }}
-          ENVIRONMENT: ${{ inputs.gce_instance_zone }}
+          GITHUB_SHA: ${{ inputs.github_sha }}
+          REGION: ${{ inputs.region }}
+          ACCOUNT: ${{ inputs.account }}
+          APP_NAME: ${{ inputs.app_name }}
+          ENVIRONMENT: ${{ inputs.environment }}
         run: |
           copilot --version
           # ./scripts/copilot-deploy.sh
@@ -59,8 +59,6 @@ jobs:
           echo $ACCOUNT
           echo $APP_NAME
           echo $ENVIRONMENT
-
-          copilot app init $APP_NAME
       
 
 
