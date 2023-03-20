@@ -70,11 +70,6 @@ jobs:
           role-to-assume: ${{ inputs.oidc_role }}
           aws-region: ${{ inputs.region }}
 
-      - name: Install AWS Copilot CLI
-        uses: ksivamuthu/aws-copilot-github-action@v0.0.1
-        with:
-          command: install
-
       # Build the Docker image
       - id: docker
         name: Build and push docker image
@@ -87,6 +82,7 @@ jobs:
           SERVICE: ${{ inputs.service }}
           ENVIRONMENT: ${{ inputs.environment }}
         run: |
+          export AWS_REGION=$REGION
           aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT.dkr.ecr.$REGION.amazonaws.com
           
           gcloud auth application-default print-access-token > auth.txt
@@ -98,5 +94,6 @@ jobs:
           docker push $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$APP_NAME/$SERVICE:latest
           docker push $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$APP_NAME/$SERVICE:$GITHUB_SHA
 
-          copilot svc deploy --app $APP_NAME --name $SERVICE --env $ENVIRONMENT --resource-tags source/revision=$GITHUB_SHA --force
+          # copilot svc deploy --app $APP_NAME --name $SERVICE --env $ENVIRONMENT --resource-tags source/revision=$GITHUB_SHA --force
+          ./scripts/aws/update-ecs-service-deployment.sh
 
