@@ -99,6 +99,5 @@ jobs:
           docker push $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$APP_NAME/$SERVICE:latest
           docker push $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$APP_NAME/$SERVICE:$GITHUB_SHA
 
-          # copilot svc deploy --app $APP_NAME --name $SERVICE --env $ENVIRONMENT --resource-tags source/revision=$GITHUB_SHA --force
           ./scripts/aws/update-ecs-service-deployment.sh
 
