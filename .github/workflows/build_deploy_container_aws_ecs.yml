@@ -99,5 +99,18 @@ jobs:
           docker push $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$APP_NAME/$SERVICE:latest
           docker push $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$APP_NAME/$SERVICE:$GITHUB_SHA
 
-          ./scripts/aws/update-ecs-service-deployment.sh
+          ENV_SHOW_RESOURCES=$(copilot env show --name $ENVIRONMENT --app $APP_NAME --json --resources)
+          ENV_CLUSTER=$(echo $ENV_SHOW_RESOURCES | jq -r '.resources[] | select((.logicalID == "Cluster")) | .physicalID')
+
+          SVC_SHOW_RESOURCES=$(copilot svc show --name $SERVICE --app $APP_NAME --json --resources)
+          SERVICE_ARN=$(echo $SVC_SHOW_RESOURCES | jq -r '.resources | .["'${ENVIRONMENT}'"][] | select((.logicalID == "Service")) | .physicalID')
+          SERVICE_ARN_ARR=(${SERVICE_ARN//// })
+          SERVICE_NAME=${SERVICE_ARN_ARR[2]}
+
+          aws ecs update-service \
+              --service "$SERVICE_NAME" \
+              --cluster "$ENV_CLUSTER" \
+              --force-new-deployment
+
+          aws ecs tag-resource --resource-arn $SERVICE_ARN --tags key=source/revision,value=$GITHUB_SHA
 
