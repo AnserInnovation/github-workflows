@@ -69,6 +69,6 @@ jobs:
         run: |
           cd omcare-cloud-cdk
           npm i
-          npm run cdk synth
-          npm run cdk deploy --require-approval=never -c environment=$ENVIRONMENT
+          ./node_modules/.bin/cdk diff
+          ./node_modules/.bin/cdk deploy --require-approval=never -c environment=$ENVIRONMENT
 
