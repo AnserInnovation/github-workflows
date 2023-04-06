@@ -27,6 +27,9 @@ on:
       service:
         required: true
         type: string
+      config_path:
+        required: true
+        type: string
     secrets:
       BUILD_SERVER_SSH_KEY:
         required: true
@@ -86,8 +89,18 @@ jobs:
           APP_NAME: ${{ inputs.app_name }}
           SERVICE: ${{ inputs.service }}
           ENVIRONMENT: ${{ inputs.environment }}
+          CONFIG_PATH: ${{ inputs.config_path }}
         run: |
           export AWS_REGION=$REGION
+
+          DB_SECRET_FULL_ARN=$(aws secretsmanager list-secrets --filter Key="tag-key",Values="aws:cloudformation:stack-name" Key="tag-value",Values="OmcareCloudDB" | jq -r '.SecretList[0].ARN')
+          DB_SECRET_VALUE=$(aws secretsmanager get-secret-value --secret-id $DB_SECRET_FULL_ARN | jq -r '.SecretString')
+          PG_HOST=$(echo $DB_SECRET_VALUE | jq -r '.host')
+
+          sed -e "s|#PGHOST|$PG_HOST|g" $CONFIG_PATH >> "$CONFIG_PATH.temp"
+          cp "$CONFIG_PATH.temp" $CONFIG_PATH
+          rm "$CONFIG_PATH.temp"
+
           aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT.dkr.ecr.$REGION.amazonaws.com
           
           gcloud auth application-default print-access-token > auth.txt
