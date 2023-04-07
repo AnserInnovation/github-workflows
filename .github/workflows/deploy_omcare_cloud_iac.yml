@@ -1,4 +1,4 @@
-name: Deploy Copilot IaC to AWS
+name: Deploy Omcare Cloud IaC to AWS
 
 on:
   workflow_call:
@@ -55,4 +55,20 @@ jobs:
         run: |
           copilot --version
           ./scripts/copilot-deploy.sh
+
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+
+      - name: Deploy OmcareCloud CDK App
+        env:
+          CDK_DEFAULT_REGION: ${{ inputs.region }}
+          CDK_DEFAULT_ACCOUNT: ${{ inputs.account }}
+          ENVIRONMENT: ${{ inputs.environment }}
+        run: |
+          cd omcare-cloud-cdk
+          npm i
+          ./node_modules/.bin/cdk diff
+          ./node_modules/.bin/cdk deploy --require-approval=never -c environment=$ENVIRONMENT
 
