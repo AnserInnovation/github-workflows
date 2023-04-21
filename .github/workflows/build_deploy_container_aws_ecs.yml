@@ -103,14 +103,25 @@ jobs:
 
           aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT.dkr.ecr.$REGION.amazonaws.com
           
-          gcloud auth application-default print-access-token > auth.txt
-          DOCKER_BUILDKIT=1 docker build --build-arg GCP_PROJECT_ID=$PROJECT_ID --build-arg ENVIRONMENT=$ENVIRONMENT --secret id=auth,src=auth.txt -t $SERVICE --ssh default .
+          IMAGE_META="$( aws ecr describe-images --repository-name=$APP_NAME/$SERVICE --image-ids imageTag=$GITHUB_SHA 2> /dev/null )"
+          if [[ $? == 0 ]]; then
+            printf "Image Tag $GITHUB_SHA found in repository $APP_NAME/$SERVICE.\nThis is a rollback\n\n"
+            
+            docker pull $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$APP_NAME/$SERVICE:$GITHUB_SHA
+            docker tag $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$APP_NAME/$SERVICE:$GITHUB_SHA $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$APP_NAME/$SERVICE:live
+            aws ecr batch-delete-image --repository-name $APP_NAME/$SERVICE --image-ids imageTag=live
+            docker push $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$APP_NAME/$SERVICE:live
+          else
+            gcloud auth application-default print-access-token > auth.txt
+            DOCKER_BUILDKIT=1 docker build --build-arg GCP_PROJECT_ID=$PROJECT_ID --build-arg ENVIRONMENT=$ENVIRONMENT --secret id=auth,src=auth.txt -t $SERVICE --ssh default .
 
-          docker tag $SERVICE $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$APP_NAME/$SERVICE:latest
-          docker tag $SERVICE $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$APP_NAME/$SERVICE:$GITHUB_SHA
-          
-          docker push $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$APP_NAME/$SERVICE:latest
-          docker push $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$APP_NAME/$SERVICE:$GITHUB_SHA
+            docker tag $SERVICE $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$APP_NAME/$SERVICE:live
+            docker tag $SERVICE $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$APP_NAME/$SERVICE:$GITHUB_SHA
+
+            docker push $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$APP_NAME/$SERVICE:$GITHUB_SHA
+            aws ecr batch-delete-image --repository-name $APP_NAME/$SERVICE --image-ids imageTag=live
+            docker push $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$APP_NAME/$SERVICE:live
+          fi
 
           ENV_SHOW_RESOURCES=$(copilot env show --name $ENVIRONMENT --app $APP_NAME --json --resources)
           ENV_CLUSTER=$(echo $ENV_SHOW_RESOURCES | jq -r '.resources[] | select((.logicalID == "Cluster")) | .physicalID')
