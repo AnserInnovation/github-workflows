@@ -103,8 +103,8 @@ jobs:
 
           aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT.dkr.ecr.$REGION.amazonaws.com
           
-          IMAGE_META="$( aws ecr describe-images --repository-name=$APP_NAME/$SERVICE --image-ids imageTag=$GITHUB_SHA 2> /dev/null )"
-          if [[ $? == 0 ]]; then
+          IMAGE_META="$( aws ecr batch-get-image --repository-name=$APP_NAME/$SERVICE --image-ids=imageTag=$GITHUB_SHA --query 'images[].imageId.imageTag' --output json )"
+          if [ "$IMAGE_META" != "[]" ]; then
             printf "Image Tag $GITHUB_SHA found in repository $APP_NAME/$SERVICE.\nThis is a rollback\n\n"
             
             docker pull $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$APP_NAME/$SERVICE:$GITHUB_SHA
