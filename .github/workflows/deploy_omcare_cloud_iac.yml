@@ -71,5 +71,5 @@ jobs:
           npm i
           npx cdk bootstrap
           npx cdk diff
-          npx cdk deploy --require-approval=never -c environment=$ENVIRONMENT
+          npx cdk deploy --all --require-approval=never -c environment=$ENVIRONMENT
 
