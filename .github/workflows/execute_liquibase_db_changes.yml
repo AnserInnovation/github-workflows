@@ -30,7 +30,7 @@ jobs:
         env:
           AWS_REGION: ${{ inputs.region }}
         run: |
-          PROPERTIES_PATH=liquibase.properties
+          PROPERTIES_PATH=liquibase.rds.properties
 
           DB_SECRET_FULL_ARN=$(aws secretsmanager list-secrets --region $AWS_REGION --filter Key="tag-key",Values="aws:cloudformation:stack-name" Key="tag-value",Values="OmcareCloudDB" | jq -r '.SecretList[0].ARN')
           DB_SECRET_VALUE=$(aws secretsmanager get-secret-value --region $AWS_REGION --secret-id $DB_SECRET_FULL_ARN | jq -r '.SecretString')
@@ -45,6 +45,6 @@ jobs:
           cp "$PROPERTIES_PATH.temp" $PROPERTIES_PATH
           rm "$PROPERTIES_PATH.temp"
           
-          ./liquibase/liquibase status --defaultsFile=liquibase.properties
-          ./liquibase/liquibase update --defaultsFile=liquibase.properties
+          ./liquibase/liquibase status --defaultsFile=liquibase.rds.properties
+          ./liquibase/liquibase update --defaultsFile=liquibase.rds.properties
 
