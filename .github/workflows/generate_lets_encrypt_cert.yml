@@ -22,8 +22,8 @@ jobs:
       id-token: write
       contents: read
     steps:
-      # - name: Checkout
-      #   uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
 
       # - uses: webfactory/ssh-agent@v0.5.2 # Add ssh-agent
       #   with:
@@ -63,6 +63,6 @@ jobs:
       
       - name: "Generate / Renew Cert"
         run: |
-          sudo /opt/hostedtoolcache/Python/3.10.12/x64/bin/certbot certonly --dns-route53 -d '*.om.care','*.internal.om.care' -v --keep-until-expiring -m developer@omcare.co --agree-tos
+          sudo /opt/hostedtoolcache/Python/3.10.12/x64/bin/certbot certonly --dns-route53 -d '*.om.care','*.internal.om.care' -v --keep-until-expiring -m developer@omcare.co --agree-tos --non-interactive
 
 
