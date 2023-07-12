@@ -7,6 +7,9 @@ on:
       oidc_role:
         required: true
         type: string
+      contact_email:
+        required: true
+        type: string
     secrets:
       # BUILD_SERVER_SSH_KEY:
       #   required: true
@@ -62,9 +65,11 @@ jobs:
           certbot --version
       
       - name: "Generate / Renew Cert"
+        env:
+          CONTACT_EMAIL: ${{ inputs.contact_email }}
         run: |
           aws sts get-caller-identity
-          echo $AWS_ACCESS_KEY_ID
-          sudo $Python3_ROOT_DIR/bin/certbot certonly --dns-route53 -d '*.om.care','*.internal.om.care' -v --keep-until-expiring -m developer@omcare.co --agree-tos --non-interactive
+          sudo echo $AWS_ACCESS_KEY_ID
+          sudo $Python3_ROOT_DIR/bin/certbot certonly --dns-route53 -d '*.om.care','*.internal.om.care' -v --keep-until-expiring -m $CONTACT_EMAIL --agree-tos --non-interactive
 
 
