@@ -60,5 +60,9 @@ jobs:
           pip3 --version
           pip3 install certbot certbot-dns-route53
           certbot --version
+      
+      - name: "Generate / Renew Cert"
+        run: |
+          certbot certonly --dns-route53 -d '*.om.care','*.internal.om.care' -v --keep-until-expiring -m developer@omcare.co
 
 
