@@ -1,0 +1,63 @@
+on:
+  workflow_call:
+    inputs:
+      region:
+        required: true
+        type: string
+      oidc_role:
+        required: true
+        type: string
+    secrets:
+      # BUILD_SERVER_SSH_KEY:
+      #   required: true
+      GCP_CREDENTIALS_JSON:
+        required: true
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    # These permissions are needed to interact with GitHub's OIDC Token endpoint.
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      # - name: Checkout
+      #   uses: actions/checkout@v2
+
+      # - uses: webfactory/ssh-agent@v0.5.2 # Add ssh-agent
+      #   with:
+      #     ssh-private-key: |
+      #       ${{ secrets.BUILD_SERVER_SSH_KEY }}
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ inputs.oidc_role }}
+          aws-region: ${{ inputs.region }}
+
+      # Setup gcloud CLI
+      - name: Get GCP secrets
+        id: "auth"
+        uses: "google-github-actions/auth@v0"
+        with:
+          credentials_json: "${{ secrets.GCP_CREDENTIALS_JSON }}"
+          export_environment_variables: true
+
+      - name: "Set up Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v0"
+
+      - name: "Use gcloud CLI"
+        run: "gcloud info"
+      
+      - name: "Install Certbot Libraries"
+        run: |
+          apt update
+          apt install software-properties-common
+          add-apt-repository ppa:deadsnakes/ppa
+          apt update
+          apt install python3.8
+          python --version
+          pip --version
+
+
