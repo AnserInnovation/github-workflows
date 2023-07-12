@@ -73,5 +73,5 @@ jobs:
           sudo aws --profile default configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
           sudo aws --profile default configure set aws_session_token $AWS_SESSION_TOKEN
           sudo $Python3_ROOT_DIR/bin/certbot certonly --dns-route53 -d *.$DOMAIN -d *.internal.$DOMAIN -v --keep-until-expiring -m $CONTACT_EMAIL --agree-tos --non-interactive
-          cat /etc/letsencrypt/live/om.care/fullchain.pem | gcloud secrets versions add wildcard-fullchain --data-file=-
-          cat /etc/letsencrypt/live/om.care/privkey.pem | gcloud secrets versions add wildcard-privkey --data-file=-
+          sudo cat /etc/letsencrypt/live/om.care/fullchain.pem | gcloud secrets versions add wildcard-fullchain --data-file=-
+          sudo cat /etc/letsencrypt/live/om.care/privkey.pem | gcloud secrets versions add wildcard-privkey --data-file=-
