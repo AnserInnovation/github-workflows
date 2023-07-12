@@ -10,6 +10,9 @@ on:
       contact_email:
         required: true
         type: string
+      domain:
+        required: true
+        type: string
     secrets:
       # BUILD_SERVER_SSH_KEY:
       #   required: true
@@ -46,17 +49,14 @@ jobs:
         with:
           credentials_json: "${{ secrets.GCP_CREDENTIALS_JSON }}"
           export_environment_variables: true
-
       - name: "Set up Cloud SDK"
         uses: "google-github-actions/setup-gcloud@v0"
-
       - name: "Use gcloud CLI"
         run: "gcloud info"
 
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-      
       - name: "Install Certbot Libraries"
         run: |
           python3 --version
@@ -67,12 +67,9 @@ jobs:
       - name: "Generate / Renew Cert"
         env:
           CONTACT_EMAIL: ${{ inputs.contact_email }}
+          DOMAIN: ${{ inputs.domain }}
         run: |
           sudo aws --profile default configure set aws_access_key_id $AWS_ACCESS_KEY_ID
           sudo aws --profile default configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
           sudo aws --profile default configure set aws_session_token $AWS_SESSION_TOKEN
-          # sudo ls ~/.aws/
-          # sudo aws sts get-caller-identity
-          sudo $Python3_ROOT_DIR/bin/certbot certonly --dns-route53 -d '*.om.care','*.internal.om.care' -v --keep-until-expiring -m $CONTACT_EMAIL --agree-tos --non-interactive
-
-
+          sudo $Python3_ROOT_DIR/bin/certbot certonly --dns-route53 -d '*.${DOMAIN}','*.internal.${DOMAIN}' -v --keep-until-expiring -m $CONTACT_EMAIL --agree-tos --non-interactive
