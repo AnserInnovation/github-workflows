@@ -63,6 +63,7 @@ jobs:
       
       - name: "Generate / Renew Cert"
         run: |
-          sudo certbot certonly --dns-route53 -d '*.om.care','*.internal.om.care' -v --keep-until-expiring -m developer@omcare.co
+          which certbot
+          # sudo certbot certonly --dns-route53 -d '*.om.care','*.internal.om.care' -v --keep-until-expiring -m developer@omcare.co
 
 
