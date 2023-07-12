@@ -64,6 +64,7 @@ jobs:
       - name: "Generate / Renew Cert"
         run: |
           aws sts get-caller-identity
+          echo $AWS_ACCESS_KEY_ID
           sudo $Python3_ROOT_DIR/bin/certbot certonly --dns-route53 -d '*.om.care','*.internal.om.care' -v --keep-until-expiring -m developer@omcare.co --agree-tos --non-interactive
 
 
