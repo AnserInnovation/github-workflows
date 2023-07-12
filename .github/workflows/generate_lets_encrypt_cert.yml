@@ -70,6 +70,7 @@ jobs:
         run: |
           aws sts get-caller-identity
           sudo echo $AWS_ACCESS_KEY_ID
+          sudo ls ~/.aws/
           sudo $Python3_ROOT_DIR/bin/certbot certonly --dns-route53 -d '*.om.care','*.internal.om.care' -v --keep-until-expiring -m $CONTACT_EMAIL --agree-tos --non-interactive
 
 
