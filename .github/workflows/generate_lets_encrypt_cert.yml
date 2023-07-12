@@ -14,8 +14,8 @@ on:
         required: true
 
 jobs:
-  deploy:
-    name: Deploy
+  create-cert:
+    name: Generate Cert
     runs-on: ubuntu-latest
     # These permissions are needed to interact with GitHub's OIDC Token endpoint.
     permissions:
