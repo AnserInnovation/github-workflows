@@ -33,7 +33,7 @@ jobs:
           aws-region: ${{ inputs.region }}
 
       # Setup gcloud CLI
-      - name: Get GCP secrets
+      - name: Authenticate GCP
         id: "auth"
         uses: "google-github-actions/auth@v0"
         with:
