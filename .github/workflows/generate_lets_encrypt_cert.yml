@@ -1,0 +1,68 @@
+on:
+  workflow_call:
+    inputs:
+      region:
+        required: true
+        type: string
+      oidc_role:
+        required: true
+        type: string
+      contact_email:
+        required: true
+        type: string
+      domain:
+        required: true
+        type: string
+    secrets:
+      GCP_CREDENTIALS_JSON:
+        required: true
+
+jobs:
+  create-cert:
+    name: Generate Cert
+    runs-on: ubuntu-latest
+    # These permissions are needed to interact with GitHub's OIDC Token endpoint.
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ inputs.oidc_role }}
+          aws-region: ${{ inputs.region }}
+
+      # Setup gcloud CLI
+      - name: Authenticate GCP
+        id: "auth"
+        uses: "google-github-actions/auth@v0"
+        with:
+          credentials_json: "${{ secrets.GCP_CREDENTIALS_JSON }}"
+          export_environment_variables: true
+      - name: "Set up Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v0"
+      - name: "Use gcloud CLI"
+        run: "gcloud info"
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: "Install Certbot Libraries"
+        run: |
+          python3 --version
+          pip3 --version
+          pip3 install certbot certbot-dns-route53
+          certbot --version
+      
+      - name: "Generate Cert"
+        env:
+          CONTACT_EMAIL: ${{ inputs.contact_email }}
+          DOMAIN: ${{ inputs.domain }}
+        run: |
+          set -e
+          sudo aws --profile default configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+          sudo aws --profile default configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+          sudo aws --profile default configure set aws_session_token $AWS_SESSION_TOKEN
+          sudo $Python3_ROOT_DIR/bin/certbot certonly --dns-route53 -d *.$DOMAIN -d *.internal.$DOMAIN -v --keep-until-expiring -m $CONTACT_EMAIL --agree-tos --non-interactive
+          sudo cat /etc/letsencrypt/live/$DOMAIN/fullchain.pem | gcloud secrets versions add wildcard-fullchain --data-file=-
+          sudo cat /etc/letsencrypt/live/$DOMAIN/privkey.pem | gcloud secrets versions add wildcard-privkey --data-file=-
