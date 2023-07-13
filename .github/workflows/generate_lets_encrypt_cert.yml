@@ -52,29 +52,26 @@ jobs:
       - name: "Set up Cloud SDK"
         uses: "google-github-actions/setup-gcloud@v0"
       - name: "Use gcloud CLI"
-        run: |
-          gcloud info
-          gcloud auth list
-          echo "secret" | gcloud secrets versions add staging-wildcard-fullchain --data-file=-
+        run: "gcloud info"
 
-      # - uses: actions/setup-python@v4
-      #   with:
-      #     python-version: '3.10'
-      # - name: "Install Certbot Libraries"
-      #   run: |
-      #     python3 --version
-      #     pip3 --version
-      #     pip3 install certbot certbot-dns-route53
-      #     certbot --version
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: "Install Certbot Libraries"
+        run: |
+          python3 --version
+          pip3 --version
+          pip3 install certbot certbot-dns-route53
+          certbot --version
       
-      # - name: "Generate Cert"
-      #   env:
-      #     CONTACT_EMAIL: ${{ inputs.contact_email }}
-      #     DOMAIN: ${{ inputs.domain }}
-      #   run: |
-      #     sudo aws --profile default configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-      #     sudo aws --profile default configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-      #     sudo aws --profile default configure set aws_session_token $AWS_SESSION_TOKEN
-      #     sudo $Python3_ROOT_DIR/bin/certbot certonly --dns-route53 -d *.$DOMAIN -d *.internal.$DOMAIN -v --keep-until-expiring -m $CONTACT_EMAIL --agree-tos --non-interactive
-      #     sudo cat /etc/letsencrypt/live/$DOMAIN/fullchain.pem | gcloud secrets versions add wildcard-fullchain --data-file=-
-      #     sudo cat /etc/letsencrypt/live/$DOMAIN/privkey.pem | gcloud secrets versions add wildcard-privkey --data-file=-
+      - name: "Generate Cert"
+        env:
+          CONTACT_EMAIL: ${{ inputs.contact_email }}
+          DOMAIN: ${{ inputs.domain }}
+        run: |
+          sudo aws --profile default configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+          sudo aws --profile default configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+          sudo aws --profile default configure set aws_session_token $AWS_SESSION_TOKEN
+          sudo $Python3_ROOT_DIR/bin/certbot certonly --dns-route53 -d *.$DOMAIN -d *.internal.$DOMAIN -v --keep-until-expiring -m $CONTACT_EMAIL --agree-tos --non-interactive
+          sudo cat /etc/letsencrypt/live/$DOMAIN/fullchain.pem | gcloud secrets versions add wildcard-fullchain --data-file=-
+          sudo cat /etc/letsencrypt/live/$DOMAIN/privkey.pem | gcloud secrets versions add wildcard-privkey --data-file=-
