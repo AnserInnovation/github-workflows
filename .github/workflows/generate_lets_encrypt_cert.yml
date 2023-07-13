@@ -59,6 +59,7 @@ jobs:
           CONTACT_EMAIL: ${{ inputs.contact_email }}
           DOMAIN: ${{ inputs.domain }}
         run: |
+          set -e
           sudo aws --profile default configure set aws_access_key_id $AWS_ACCESS_KEY_ID
           sudo aws --profile default configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
           sudo aws --profile default configure set aws_session_token $AWS_SESSION_TOKEN
