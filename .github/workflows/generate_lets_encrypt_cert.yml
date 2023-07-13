@@ -14,8 +14,6 @@ on:
         required: true
         type: string
     secrets:
-      # BUILD_SERVER_SSH_KEY:
-      #   required: true
       GCP_CREDENTIALS_JSON:
         required: true
 
@@ -28,14 +26,6 @@ jobs:
       id-token: write
       contents: read
     steps:
-      # - name: Checkout
-      #   uses: actions/checkout@v2
-
-      # - uses: webfactory/ssh-agent@v0.5.2 # Add ssh-agent
-      #   with:
-      #     ssh-private-key: |
-      #       ${{ secrets.BUILD_SERVER_SSH_KEY }}
-      
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
