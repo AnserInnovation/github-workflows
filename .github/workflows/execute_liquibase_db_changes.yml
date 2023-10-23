@@ -47,4 +47,9 @@ jobs:
           
           ./liquibase/liquibase status --defaultsFile=liquibase.rds.properties
           ./liquibase/liquibase update --defaultsFile=liquibase.rds.properties --contexts=${{ inputs.environment }}
+      - name: Microsoft Teams Notification
+        uses: skitionek/notify-microsoft-teams@master
+        if: failure()
+        with:
+          webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
 
