@@ -9,6 +9,9 @@ on:
       environment:
         required: true
         type: string
+    secrets:
+      MSTEAMS_WEBHOOK:
+        required: true
 
 jobs:
   liquibase:
@@ -19,6 +22,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Install Libraries
         run: |
+          set -e
           if [ ! -f ./liquibase/liquibase ]
           then
             echo "Downloading liquibase..."
@@ -30,6 +34,7 @@ jobs:
         env:
           AWS_REGION: ${{ inputs.region }}
         run: |
+          set -e
           PROPERTIES_PATH=liquibase.rds.properties
 
           DB_SECRET_FULL_ARN=$(aws secretsmanager list-secrets --region $AWS_REGION --filter Key="tag-key",Values="aws:cloudformation:stack-name" Key="tag-value",Values="OmcareCloudDB" | jq -r '.SecretList[0].ARN')
@@ -51,5 +56,6 @@ jobs:
         uses: skitionek/notify-microsoft-teams@master
         if: failure()
         with:
-          webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
-
+          webhook_url: "${{ secrets.MSTEAMS_WEBHOOK }}"
+          overwrite: "{title: `Failure in ${{ inputs.environment }} Liquibase DB Changes Workflow`, themeColor: '#e01010'}"
+          job: ${{ toJson(job) }}
