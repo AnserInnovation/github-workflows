@@ -23,7 +23,6 @@ jobs:
       - name: Install Libraries
         run: |
           set -e
-          ls -l nofolder
           if [ ! -f ./liquibase/liquibase ]
           then
             echo "Downloading liquibase..."
