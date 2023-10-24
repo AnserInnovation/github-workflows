@@ -9,6 +9,9 @@ on:
       environment:
         required: true
         type: string
+    secrets:
+      MSTEAMS_WEBHOOK:
+        required: true
 
 jobs:
   liquibase:
