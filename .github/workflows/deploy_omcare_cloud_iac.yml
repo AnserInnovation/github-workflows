@@ -69,7 +69,7 @@ jobs:
         run: |
           cd omcare-cloud-cdk
           npm i
-          npx cdk bootstrap
+          npx cdk bootstrap -c environment=$ENVIRONMENT
           npx cdk diff -c environment=$ENVIRONMENT
           npx cdk deploy --all --require-approval=never -c environment=$ENVIRONMENT
 
