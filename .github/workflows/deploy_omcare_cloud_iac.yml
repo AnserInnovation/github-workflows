@@ -41,35 +41,40 @@ jobs:
           aws-region: ${{ inputs.region }}
       
       - name: Install AWS Copilot CLI
-        uses: ksivamuthu/aws-copilot-github-action@v0.0.1
-        with:
-          command: install
+        # uses: ksivamuthu/aws-copilot-github-action@v0.0.1
+        # with:
+        #   command: install
+        run: |
+          sudo curl -Lo /usr/local/bin/copilot https://github.com/aws/copilot-cli/releases/download/v1.32.0/copilot-linux-v1.32.0 \
+            && sudo chmod +x /usr/local/bin/copilot \
+            && copilot --help
+            && copilot --version
       
-      - name: Execute Copilot Deployment Script
-        env:
-          GITHUB_SHA: ${{ inputs.github_sha }}
-          REGION: ${{ inputs.region }}
-          ACCOUNT: ${{ inputs.account }}
-          APP_NAME: ${{ inputs.app_name }}
-          ENVIRONMENT: ${{ inputs.environment }}
-        run: |
-          copilot --version
-          ./scripts/copilot-deploy.sh
+      # - name: Execute Copilot Deployment Script
+      #   env:
+      #     GITHUB_SHA: ${{ inputs.github_sha }}
+      #     REGION: ${{ inputs.region }}
+      #     ACCOUNT: ${{ inputs.account }}
+      #     APP_NAME: ${{ inputs.app_name }}
+      #     ENVIRONMENT: ${{ inputs.environment }}
+      #   run: |
+      #     copilot --version
+      #     ./scripts/copilot-deploy.sh
 
-      - name: Set up Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
+      # - name: Set up Node
+      #   uses: actions/setup-node@v3
+      #   with:
+      #     node-version: "18"
 
-      - name: Deploy OmcareCloud CDK App
-        env:
-          CDK_DEFAULT_REGION: ${{ inputs.region }}
-          CDK_DEFAULT_ACCOUNT: ${{ inputs.account }}
-          ENVIRONMENT: ${{ inputs.environment }}
-        run: |
-          cd omcare-cloud-cdk
-          npm i
-          npx cdk bootstrap -c environment=$ENVIRONMENT
-          npx cdk diff -c environment=$ENVIRONMENT
-          npx cdk deploy --all --require-approval=never -c environment=$ENVIRONMENT
+      # - name: Deploy OmcareCloud CDK App
+      #   env:
+      #     CDK_DEFAULT_REGION: ${{ inputs.region }}
+      #     CDK_DEFAULT_ACCOUNT: ${{ inputs.account }}
+      #     ENVIRONMENT: ${{ inputs.environment }}
+      #   run: |
+      #     cd omcare-cloud-cdk
+      #     npm i
+      #     npx cdk bootstrap -c environment=$ENVIRONMENT
+      #     npx cdk diff -c environment=$ENVIRONMENT
+      #     npx cdk deploy --all --require-approval=never -c environment=$ENVIRONMENT
 
