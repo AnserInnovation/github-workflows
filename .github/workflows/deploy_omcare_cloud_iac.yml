@@ -54,7 +54,6 @@ jobs:
           APP_NAME: ${{ inputs.app_name }}
           ENVIRONMENT: ${{ inputs.environment }}
         run: |
-          copilot --version
           ./scripts/copilot-deploy.sh
 
       - name: Set up Node
