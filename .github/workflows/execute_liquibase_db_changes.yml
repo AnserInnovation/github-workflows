@@ -50,7 +50,7 @@ jobs:
           cp "$PROPERTIES_PATH.temp" $PROPERTIES_PATH
           rm "$PROPERTIES_PATH.temp"
           
-          ./liquibase/liquibase status --defaultsFile=liquibase.rds.properties
+          ./liquibase/liquibase status --defaultsFile=liquibase.rds.properties --contexts=${{ inputs.environment }}
           ./liquibase/liquibase update --defaultsFile=liquibase.rds.properties --contexts=${{ inputs.environment }}
       - name: Microsoft Teams Notification
         uses: skitionek/notify-microsoft-teams@master
