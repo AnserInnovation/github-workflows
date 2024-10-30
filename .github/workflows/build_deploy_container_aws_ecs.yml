@@ -112,6 +112,7 @@ jobs:
             aws ecr batch-delete-image --repository-name $APP_NAME/$SERVICE --image-ids imageTag=live
             docker push $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$APP_NAME/$SERVICE:live
           else
+            npm i
             gcloud auth application-default print-access-token > auth.txt
             DOCKER_BUILDKIT=1 docker build --build-arg GCP_PROJECT_ID=$PROJECT_ID --build-arg ENVIRONMENT=$ENVIRONMENT --secret id=auth,src=auth.txt -t $SERVICE --ssh default .
 
