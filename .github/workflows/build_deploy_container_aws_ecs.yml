@@ -74,9 +74,10 @@ jobs:
           aws-region: ${{ inputs.region }}
 
       - name: Install AWS Copilot CLI
-        uses: ksivamuthu/aws-copilot-github-action@v0.0.1
-        with:
-          command: install
+        run: |
+          sudo curl -Lo /usr/local/bin/copilot https://github.com/aws/copilot-cli/releases/download/v1.32.0/copilot-linux-v1.32.0 \
+            && sudo chmod +x /usr/local/bin/copilot \
+            && copilot --version
 
       # Build the Docker image
       - id: docker
