@@ -56,13 +56,13 @@ jobs:
       # Setup gcloud CLI
       - name: Get GCP secrets
         id: "auth"
-        uses: "google-github-actions/auth@v0"
+        uses: "google-github-actions/auth@v1"
         with:
           credentials_json: "${{ secrets.GCP_CREDENTIALS_JSON }}"
           export_environment_variables: true
 
       - name: "Set up Cloud SDK"
-        uses: "google-github-actions/setup-gcloud@v0"
+        uses: "google-github-actions/setup-gcloud@v1"
 
       - name: "Use gcloud CLI"
         run: "gcloud info"
@@ -103,11 +103,11 @@ jobs:
           rm "$CONFIG_PATH.temp"
 
           aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT.dkr.ecr.$REGION.amazonaws.com
-          
+
           IMAGE_META="$( aws ecr batch-get-image --repository-name=$APP_NAME/$SERVICE --image-ids=imageTag=$GITHUB_SHA --query 'images[].imageId.imageTag' --output json )"
           if [ "$IMAGE_META" != "[]" ]; then
             printf "Image Tag $GITHUB_SHA found in repository $APP_NAME/$SERVICE.\nThis is a rollback\n\n"
-            
+
             docker pull $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$APP_NAME/$SERVICE:$GITHUB_SHA
             docker tag $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$APP_NAME/$SERVICE:$GITHUB_SHA $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$APP_NAME/$SERVICE:live
             aws ecr batch-delete-image --repository-name $APP_NAME/$SERVICE --image-ids imageTag=live
