@@ -74,12 +74,6 @@ jobs:
         run: |
           export AWS_REGION=$REGION
 
-          # Get AWS credentials and create a session token file
-          AWS_CREDENTIALS=$(aws sts get-session-token --duration-seconds 900)
-          AWS_ACCESS_KEY_ID=$(echo $AWS_CREDENTIALS | jq -r '.Credentials.AccessKeyId')
-          AWS_SECRET_ACCESS_KEY=$(echo $AWS_CREDENTIALS | jq -r '.Credentials.SecretAccessKey')
-          AWS_SESSION_TOKEN=$(echo $AWS_CREDENTIALS | jq -r '.Credentials.SessionToken')
-          
           # Create AWS credentials file for the docker build process
           echo "[default]
           aws_access_key_id = $AWS_ACCESS_KEY_ID
