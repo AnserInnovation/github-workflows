@@ -3,9 +3,6 @@ name: Build and Deploy Container AWS ECS
 on:
   workflow_call:
     inputs:
-      gcp_project_id:
-        required: true
-        type: string
       github_sha:
         required: true
         type: string
@@ -33,8 +30,6 @@ on:
     secrets:
       BUILD_SERVER_SSH_KEY:
         required: true
-      GCP_CREDENTIALS_JSON:
-        required: true
 
 jobs:
   build_publish_deploy:
@@ -53,20 +48,6 @@ jobs:
           ssh-private-key: |
             ${{ secrets.BUILD_SERVER_SSH_KEY }}
 
-      # Setup gcloud CLI
-      - name: Get GCP secrets
-        id: "auth"
-        uses: "google-github-actions/auth@v1"
-        with:
-          credentials_json: "${{ secrets.GCP_CREDENTIALS_JSON }}"
-          export_environment_variables: true
-
-      - name: "Set up Cloud SDK"
-        uses: "google-github-actions/setup-gcloud@v1"
-
-      - name: "Use gcloud CLI"
-        run: "gcloud info"
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -83,7 +64,6 @@ jobs:
       - id: docker
         name: Build and push docker image
         env:
-          PROJECT_ID: ${{ inputs.gcp_project_id }}
           GITHUB_SHA: ${{ inputs.github_sha }}
           REGION: ${{ inputs.region }}
           ACCOUNT: ${{ inputs.account }}
