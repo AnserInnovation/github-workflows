@@ -58,11 +58,24 @@ jobs:
         env:
           CONTACT_EMAIL: ${{ inputs.contact_email }}
           DOMAIN: ${{ inputs.domain }}
+          REGION: ${{ inputs.region }}
         run: |
           set -e
           sudo aws --profile default configure set aws_access_key_id $AWS_ACCESS_KEY_ID
           sudo aws --profile default configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
           sudo aws --profile default configure set aws_session_token $AWS_SESSION_TOKEN
+
           sudo $Python3_ROOT_DIR/bin/certbot certonly --dns-route53 -d *.$DOMAIN -d *.internal.$DOMAIN -v --keep-until-expiring -m $CONTACT_EMAIL --agree-tos --non-interactive
-          sudo cat /etc/letsencrypt/live/$DOMAIN/fullchain.pem | gcloud secrets versions add wildcard-fullchain --data-file=-
-          sudo cat /etc/letsencrypt/live/$DOMAIN/privkey.pem | gcloud secrets versions add wildcard-privkey --data-file=-
+
+          FULLCHAIN=$(sudo cat /etc/letsencrypt/live/$DOMAIN/fullchain.pem)
+          PRIVKEY=$(sudo cat /etc/letsencrypt/live/$DOMAIN/privkey.pem)
+          
+          aws secretsmanager put-secret-value \
+            --secret-id "omcare/wildcard-fullchain" \
+            --secret-string "$FULLCHAIN" \
+            --region $REGION
+          
+          aws secretsmanager put-secret-value \
+            --secret-id "omcare/wildcard-privkey" \
+            --secret-string "$PRIVKEY" \
+            --region $REGION
