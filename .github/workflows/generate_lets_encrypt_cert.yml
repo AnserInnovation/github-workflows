@@ -13,9 +13,6 @@ on:
       domain:
         required: true
         type: string
-    secrets:
-      GCP_CREDENTIALS_JSON:
-        required: true
 
 jobs:
   create-cert:
@@ -31,18 +28,6 @@ jobs:
         with:
           role-to-assume: ${{ inputs.oidc_role }}
           aws-region: ${{ inputs.region }}
-
-      # Setup gcloud CLI
-      - name: Authenticate GCP
-        id: "auth"
-        uses: "google-github-actions/auth@v1"
-        with:
-          credentials_json: "${{ secrets.GCP_CREDENTIALS_JSON }}"
-          export_environment_variables: true
-      - name: "Set up Cloud SDK"
-        uses: "google-github-actions/setup-gcloud@v1"
-      - name: "Use gcloud CLI"
-        run: "gcloud info"
 
       - uses: actions/setup-python@v4
         with:
