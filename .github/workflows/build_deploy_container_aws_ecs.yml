@@ -3,9 +3,6 @@ name: Build and Deploy Container AWS ECS
 on:
   workflow_call:
     inputs:
-      gcp_project_id:
-        required: true
-        type: string
       github_sha:
         required: true
         type: string
@@ -33,8 +30,6 @@ on:
     secrets:
       BUILD_SERVER_SSH_KEY:
         required: true
-      GCP_CREDENTIALS_JSON:
-        required: true
 
 jobs:
   build_publish_deploy:
@@ -53,20 +48,6 @@ jobs:
           ssh-private-key: |
             ${{ secrets.BUILD_SERVER_SSH_KEY }}
 
-      # Setup gcloud CLI
-      - name: Get GCP secrets
-        id: "auth"
-        uses: "google-github-actions/auth@v1"
-        with:
-          credentials_json: "${{ secrets.GCP_CREDENTIALS_JSON }}"
-          export_environment_variables: true
-
-      - name: "Set up Cloud SDK"
-        uses: "google-github-actions/setup-gcloud@v1"
-
-      - name: "Use gcloud CLI"
-        run: "gcloud info"
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -83,7 +64,6 @@ jobs:
       - id: docker
         name: Build and push docker image
         env:
-          PROJECT_ID: ${{ inputs.gcp_project_id }}
           GITHUB_SHA: ${{ inputs.github_sha }}
           REGION: ${{ inputs.region }}
           ACCOUNT: ${{ inputs.account }}
@@ -93,6 +73,13 @@ jobs:
           CONFIG_PATH: ${{ inputs.config_path }}
         run: |
           export AWS_REGION=$REGION
+
+          # Create AWS credentials file for the docker build process
+          echo "[default]
+          aws_access_key_id = $AWS_ACCESS_KEY_ID
+          aws_secret_access_key = $AWS_SECRET_ACCESS_KEY
+          aws_session_token = $AWS_SESSION_TOKEN
+          region = $REGION" > aws_credentials
 
           DB_SECRET_FULL_ARN=$(aws secretsmanager list-secrets --filter Key="tag-key",Values="aws:cloudformation:stack-name" Key="tag-value",Values="OmcareCloudDB" | jq -r '.SecretList[0].ARN')
           DB_SECRET_VALUE=$(aws secretsmanager get-secret-value --secret-id $DB_SECRET_FULL_ARN | jq -r '.SecretString')
@@ -114,8 +101,14 @@ jobs:
             docker push $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$APP_NAME/$SERVICE:live
           else
             npm i
-            gcloud auth application-default print-access-token > auth.txt
-            DOCKER_BUILDKIT=1 docker build --build-arg GCP_PROJECT_ID=$PROJECT_ID --build-arg ENVIRONMENT=$ENVIRONMENT --secret id=auth,src=auth.txt -t $SERVICE --ssh default .
+            DOCKER_BUILDKIT=1 docker build \
+              --build-arg AWS_REGION=$REGION \
+              --build-arg ENVIRONMENT=$ENVIRONMENT \
+              --secret id=aws_credentials,src=aws_credentials \
+              -t $SERVICE --ssh default .
+
+            # Clean up AWS credentials file
+            rm aws_credentials
 
             docker tag $SERVICE $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$APP_NAME/$SERVICE:live
             docker tag $SERVICE $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/$APP_NAME/$SERVICE:$GITHUB_SHA
