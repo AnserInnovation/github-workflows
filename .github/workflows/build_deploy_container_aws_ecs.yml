@@ -41,15 +41,15 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
-      - uses: webfactory/ssh-agent@v0.5.2 # Add ssh-agent
+      - uses: webfactory/ssh-agent@836c84ec59a0e7bc0eabc79988384eb567561ee2 # Add ssh-agent
         with:
           ssh-private-key: |
             ${{ secrets.BUILD_SERVER_SSH_KEY }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355
         with:
           role-to-assume: ${{ inputs.oidc_role }}
           aws-region: ${{ inputs.region }}
